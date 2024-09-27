@@ -79,60 +79,128 @@ function resize(e) {
         if (isAltPressed) {
             applyAltResize(deltaX * 2, deltaY * 2);
         } else {
-            newWidth = Math.min(Math.max(startWidth + deltaX, 10), containerRect.width - startLeft);
-            newHeight = Math.min(Math.max(startHeight + deltaY, 10), containerRect.height - startTop);
+            newWidth = startWidth + deltaX;
+            newHeight = startHeight + deltaY;
             newLeft = startLeft;
             newTop = startTop;
+            if (newWidth < 0) {
+                newWidth = Math.abs(newWidth);
+                newLeft = startLeft - newWidth;
+            }
+            if (newHeight < 0) {
+                newHeight = Math.abs(newHeight);
+                newTop = startTop - newHeight;
+            }
         }
     // 左下角
     } else if (currentHandle.classList.contains('left-bottom')) {
         if (isAltPressed) {
             applyAltResize(-deltaX * 2, deltaY * 2);
         } else {
-            newWidth = Math.min(Math.max(startWidth - deltaX, 10), startLeft + startWidth);
-            newHeight = Math.min(Math.max(startHeight + deltaY, 10), containerRect.height - startTop);
-            newLeft = Math.max(0, Math.min(startLeft + deltaX, startLeft + startWidth - 10));
+            newWidth = startWidth - deltaX;
+            newHeight = startHeight + deltaY;
+            newLeft = startLeft + deltaX;
             newTop = startTop;
+            if (newWidth < 0) {
+                newWidth = Math.abs(newWidth);
+                newLeft = startLeft + startWidth;
+            }
+            if (newHeight < 0) {
+                newHeight = Math.abs(newHeight);
+                newTop = startTop - newHeight;
+            }
         }
     // 右上角
     } else if (currentHandle.classList.contains('right-top')) {
         if (isAltPressed) {
             applyAltResize(deltaX * 2, -deltaY * 2);
         } else {
-            newWidth = Math.min(Math.max(startWidth + deltaX, 10), containerRect.width - startLeft);
-            newHeight = Math.min(Math.max(startHeight - deltaY, 10), startTop + startHeight);
+            newWidth = startWidth + deltaX;
+            newHeight = startHeight - deltaY;
             newLeft = startLeft;
-            newTop = Math.max(0, Math.min(startTop + deltaY, startTop + startHeight - 10));
+            newTop = startTop + deltaY;
+            if (newWidth < 0) {
+                newWidth = Math.abs(newWidth);
+                newLeft = startLeft - newWidth;
+            }
+            if (newHeight < 0) {
+                newHeight = Math.abs(newHeight);
+                newTop = startTop + startHeight;
+            }
         }
     // 左上角
     } else if (currentHandle.classList.contains('left-top')) {
         if (isAltPressed) {
             applyAltResize(-deltaX * 2, -deltaY * 2);
         } else {
-            newWidth = Math.min(Math.max(startWidth - deltaX, 10), startLeft + startWidth);
-            newHeight = Math.min(Math.max(startHeight - deltaY, 10), startTop + startHeight);
-            newLeft = Math.max(0, Math.min(startLeft + deltaX, startLeft + startWidth - 10));
-            newTop = Math.max(0, Math.min(startTop + deltaY, startTop + startHeight - 10));
+            newWidth = startWidth - deltaX;
+            newHeight = startHeight - deltaY;
+            newLeft = startLeft + deltaX;
+            newTop = startTop + deltaY;
+            if (newWidth < 0) {
+                newWidth = Math.abs(newWidth);
+                newLeft = startLeft + startWidth;
+            }
+            if (newHeight < 0) {
+                newHeight = Math.abs(newHeight);
+                newTop = startTop + startHeight;
+            }
         }
-    // 上或下
-    } else if (currentHandle.classList.contains('top') || currentHandle.classList.contains('bottom')) {
+    // 上
+    } else if (currentHandle.classList.contains('top')) {
         if (isAltPressed) {
-            applyAltResize(0, currentHandle.classList.contains('top') ? -deltaY * 2 : deltaY * 2);
+            applyAltResize(0, -deltaY * 2);
         } else {
             newWidth = startWidth;
-            newHeight = Math.min(Math.max(startHeight + (currentHandle.classList.contains('top') ? -deltaY : deltaY), 10), currentHandle.classList.contains('top') ? startTop + startHeight : containerRect.height - startTop);
+            newHeight = startHeight - deltaY;
             newLeft = startLeft;
-            newTop = currentHandle.classList.contains('top') ? Math.max(0, Math.min(startTop + deltaY, startTop + startHeight - 10)) : startTop;
+            newTop = startTop + deltaY;
+            if (newHeight < 0) {
+                newHeight = Math.abs(newHeight);
+                newTop = startTop + startHeight;
+            }
         }
-    // 左或右
-    } else if (currentHandle.classList.contains('right') || currentHandle.classList.contains('left')) {
+    // 下
+    } else if (currentHandle.classList.contains('bottom')) {
         if (isAltPressed) {
-            applyAltResize(currentHandle.classList.contains('left') ? -deltaX * 2 : deltaX * 2, 0);
+            applyAltResize(0, deltaY * 2);
         } else {
-            newWidth = Math.min(Math.max(startWidth + (currentHandle.classList.contains('left') ? -deltaX : deltaX), 10), currentHandle.classList.contains('left') ? startLeft + startWidth : containerRect.width - startLeft);
-            newHeight = startHeight;
-            newLeft = currentHandle.classList.contains('left') ? Math.max(0, Math.min(startLeft + deltaX, startLeft + startWidth - 10)) : startLeft;
+            newWidth = startWidth;
+            newHeight = startHeight + deltaY;
+            newLeft = startLeft;
             newTop = startTop;
+            if (newHeight < 0) {
+                newHeight = Math.abs(newHeight);
+                newTop = startTop - newHeight;
+            }
+        }
+    // 左
+    } else if (currentHandle.classList.contains('left')) {
+        if (isAltPressed) {
+            applyAltResize(-deltaX * 2, 0);
+        } else {
+            newWidth = startWidth - deltaX;
+            newHeight = startHeight;
+            newLeft = startLeft + deltaX;
+            newTop = startTop;
+            if (newWidth < 0) {
+                newWidth = Math.abs(newWidth);
+                newLeft = startLeft + startWidth;
+            }
+        }
+    // 右
+    } else if (currentHandle.classList.contains('right')) {
+        if (isAltPressed) {
+            applyAltResize(deltaX * 2, 0);
+        } else {
+            newWidth = startWidth + deltaX;
+            newHeight = startHeight;
+            newLeft = startLeft;
+            newTop = startTop;
+            if (newWidth < 0) {
+                newWidth = Math.abs(newWidth);
+                newLeft = startLeft  - newWidth;
+            }
         }
     }
 
@@ -169,14 +237,19 @@ function resize(e) {
     // 确保裁剪框不会超出容器边界
     // newLeft = Math.max(0, Math.min(newLeft, containerRect.width - newWidth));
     // newTop = Math.max(0, Math.min(newTop, containerRect.height - newHeight));
-    // newWidth = Math.min(newWidth, containerRect.width - newLeft);
-    // newHeight = Math.min(newHeight, containerRect.height - newTop);
+    newWidth = Math.min(newWidth, containerRect.width - newLeft);
+    newHeight = Math.min(newHeight, containerRect.height - newTop);
 
+    console.log('debug', { newWidth, newHeight, newLeft, newTop })
+    updateCropBox({ newWidth, newHeight, newLeft, newTop });
+}
+
+function updateCropBox({newWidth, newHeight, newLeft, newTop}) {
     // 应用新的尺寸和位置
     cropBox.style.width = `${newWidth}px`;
     cropBox.style.height = `${newHeight}px`;
     cropBox.style.left = `${newLeft}px`;
-    cropBox.style.top = `${newTop}px`;
+    cropBox.style.top = `${newTop}px`;    
 }
 
 function drag(e) {
