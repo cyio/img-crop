@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片裁切 Demo</title>
+    <style>
+        #cropperContainer {
+            position: relative;
+            width: 500px;
+            height: 500px;
+            border: 1px solid #ccc;
+            overflow: hidden;
+        }
+        #cropBox {
+            position: absolute;
+            border: 2px solid #fff;
+            box-shadow: 0 0 0 9999em rgba(0, 0, 0, 0.5);
+            box-sizing: border-box;
+        }
+        .resize-handle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #fff;
+            border: 1px solid #333;
+        }
+        .resize-handle.left-top { top: -5px; left: -5px; cursor: nwse-resize; }
+        .resize-handle.right-top { top: -5px; right: -5px; cursor: nesw-resize; }
+        .resize-handle.left-bottom { bottom: -5px; left: -5px; cursor: nesw-resize; }
+        .resize-handle.right-bottom { bottom: -5px; right: -5px; cursor: nwse-resize; }
+        .resize-handle.top { 
+            top: -5px; left: 50%; margin-left: -5px; cursor: ns-resize; 
+            /* cursor: ns-resize;
+            width: 100%;
+            height: 1px;
+            border: 0; */
+        }
+        .resize-handle.right { 
+            top: 50%; right: -5px; margin-top: -5px; cursor: ew-resize;
+            /* cursor: ew-resize;
+            height: 100%;
+            width: 1px;
+            border: 0; */
+         }
+        .resize-handle.bottom { 
+            bottom: -5px; left: 50%; margin-left: -5px; cursor: ns-resize;
+            /* cursor: ns-resize;
+            width: 100%;
+            height: 1px;
+            border: 0; */
+         }
+        .resize-handle.left { 
+            top: 50%; left: -5px; margin-top: -5px; cursor: ew-resize;
+            /* cursor: ew-resize;
+            height: 100%;
+            width: 1px;
+            border: 0; */
+         }
+        #dragArea {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            cursor: move;
+        }
+    </style>
+</head>
+<body>
+    <div id="cropperContainer">
+        <img src="/api/placeholder/500/500" alt="placeholder" id="image">
+        <div id="cropBox">
+            <div id="dragArea"></div>
+            <div class="resize-handle left-top"></div>
+            <div class="resize-handle right-top"></div>
+            <div class="resize-handle left-bottom"></div>
+            <div class="resize-handle right-bottom"></div>
+            <div class="resize-handle top"></div>
+            <div class="resize-handle right"></div>
+            <div class="resize-handle bottom"></div>
+            <div class="resize-handle left"></div>
+        </div>
+    </div>
+
+<script src="./index.js">
+</script>
+</body>
+</html>
