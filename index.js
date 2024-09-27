@@ -89,6 +89,7 @@ function resize(e) {
             }
             if (newHeight < 0) {
                 newHeight = Math.abs(newHeight);
+                newHeight = Math.min(newHeight, startTop);
                 newTop = startTop - newHeight;
             }
         }
@@ -107,6 +108,7 @@ function resize(e) {
             }
             if (newHeight < 0) {
                 newHeight = Math.abs(newHeight);
+                newHeight = Math.min(newHeight, startTop);
                 newTop = startTop - newHeight;
             }
         }
@@ -171,6 +173,7 @@ function resize(e) {
             newTop = startTop;
             if (newHeight < 0) {
                 newHeight = Math.abs(newHeight);
+                newHeight = Math.min(newHeight, startTop)
                 newTop = startTop - newHeight;
             }
         }
