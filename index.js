@@ -219,11 +219,16 @@ function resize(e) {
             if (newWidth / aspectRatio <= newHeight) {
                 adjustedWidth = newWidth;
                 adjustedHeight = newWidth / aspectRatio;
+                // console.log('d1')
             } else {
                 adjustedHeight = newHeight;
                 adjustedWidth = newHeight * aspectRatio;
+                // console.log('d2', adjustedHeight, newHeight * aspectRatio, aspectRatio)
             }
         }
+        // console.log('d3', adjustedHeight)
+        // 最大约束
+        // adjustedWidth = Math.min(adjustedWidth, newHeight * aspectRatio);
 
         if (!isAltPressed) {
             if (currentHandle.classList.contains('left-top') || currentHandle.classList.contains('left-bottom') || currentHandle.classList.contains('left')) {
@@ -242,6 +247,19 @@ function resize(e) {
     // newTop = Math.max(0, Math.min(newTop, containerRect.height - newHeight));
     newWidth = Math.min(newWidth, containerRect.width - newLeft);
     newHeight = Math.min(newHeight, containerRect.height - newTop);
+
+    // 保持比例，输出不变形
+    if (isShiftPressed) {
+        if (newWidth / aspectRatio <= newHeight) {
+            // adjustedWidth = newWidth;
+            newHeight = newWidth / aspectRatio;
+            console.log('d1')
+        } else {
+            // adjustedHeight = newHeight;
+            newWidth = newHeight * aspectRatio;
+            // console.log('d2', adjustedHeight, newHeight * aspectRatio, aspectRatio)
+        }
+    }
 
     console.log('debug', { newWidth, newHeight, newLeft, newTop })
     updateCropBox({ newWidth, newHeight, newLeft, newTop });
