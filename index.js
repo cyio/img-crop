@@ -68,11 +68,76 @@ function resize(e) {
     function applyAltResize(widthChange, heightChange) {
         const centerX = startLeft + startWidth / 2;
         const centerY = startTop + startHeight / 2;
-        newWidth = Math.min(Math.max(startWidth + widthChange, 0), containerRect.width);
-        newHeight = Math.min(Math.max(startHeight + heightChange, 0), containerRect.height);
-        newLeft = Math.max(0, Math.min(centerX - newWidth / 2, containerRect.width - newWidth));
-        newTop = Math.max(0, Math.min(centerY - newHeight / 2, containerRect.height - newHeight));
+        if (isShiftPressed) {
+            if (currentHandle.classList.contains('top') || currentHandle.classList.contains('bottom')) {
+                newHeight = startHeight + heightChange
+                newWidth = newHeight * aspectRatio;
+            } else if (currentHandle.classList.contains('left') || currentHandle.classList.contains('right')) {
+                newWidth = startWidth + widthChange
+                newHeight = newWidth / aspectRatio
+            } else {
+                newWidth = startWidth + widthChange
+                newHeight = newWidth / aspectRatio
+            }
+            newTop = centerY - newHeight / 2;
+            newLeft = centerX - newWidth / 2;
+        } else {
+            newWidth = Math.min(Math.max(startWidth + widthChange, 0), containerRect.width);
+            newHeight = Math.min(Math.max(startHeight + heightChange, 0), containerRect.height);
+            newLeft = Math.max(0, Math.min(centerX - newWidth / 2, containerRect.width - newWidth));
+            newTop = Math.max(0, Math.min(centerY - newHeight / 2, containerRect.height - newHeight));    
+        }
+        console.log('applyAltResize input', {centerX, centerY, widthChange, heightChange, startWidth})
+        console.log('applyAltResize output', {newLeft, newWidth})
     }
+
+    function applyShiftAdjust() {
+        if (!isShiftPressed) return;
+
+        let adjustedWidth, adjustedHeight;
+        if (currentHandle.classList.contains('top') || currentHandle.classList.contains('bottom')) {
+            adjustedHeight = newHeight;
+            adjustedWidth = newHeight * aspectRatio;
+        } else if (currentHandle.classList.contains('left') || currentHandle.classList.contains('right')) {
+            adjustedWidth = newWidth;
+            adjustedHeight = newWidth / aspectRatio;
+        } else {
+            if (newWidth / aspectRatio <= newHeight) {
+                adjustedWidth = newWidth;
+                adjustedHeight = newWidth / aspectRatio;
+                if (currentHandle.classList.contains('left-top') || currentHandle.classList.contains('right-top')) {
+                    const deltaY = startHeight - adjustedHeight; // 计算调整后的 delta
+                    newTop = startTop + deltaY;
+                }
+            } else {
+                adjustedHeight = newHeight;
+                adjustedWidth = newHeight * aspectRatio;
+                if (
+                    currentHandle.classList.contains('left-top') ||
+                    currentHandle.classList.contains('left-bottom')
+                ) {
+                    const deltaX = startWidth - adjustedWidth;
+                    newLeft = startLeft + deltaX;
+                }
+            }
+        }
+        if (currentHandle.classList.contains('right') || currentHandle.classList.contains('left')) {
+            const deltaY = adjustedHeight - startHeight;
+            newTop -= deltaY / 2;
+        }
+        if (currentHandle.classList.contains('top') || currentHandle.classList.contains('bottom')) {
+            const delta = adjustedWidth - startWidth;
+            newLeft -= delta / 2;
+        }
+
+        newWidth = adjustedWidth;
+        newHeight = adjustedHeight;
+        console.log('applyShiftAdjust input', { startTop, startHeight });
+        console.log('applyShiftAdjust output', { newTop, newHeight });
+        // console.log('debug shift: ', { newWidth, newHeight })
+    }
+
+    const enableOpposite = !isAltPressed && !isShiftPressed; // 无按键时，允许反向调节
 
     // 右下角
     if (currentHandle.classList.contains('right-bottom')) {
@@ -83,14 +148,16 @@ function resize(e) {
             newHeight = startHeight + deltaY;
             newLeft = startLeft;
             newTop = startTop;
+            applyShiftAdjust();
+        }
+        if (enableOpposite) {
             if (newWidth < 0) {
                 newWidth = Math.abs(newWidth);
-                newLeft = startLeft - newWidth;
+                newLeft -= newWidth;
             }
             if (newHeight < 0) {
                 newHeight = Math.abs(newHeight);
-                newHeight = Math.min(newHeight, startTop);
-                newTop = startTop - newHeight;
+                newTop -= newHeight;
             }
         }
     // 左下角
@@ -102,14 +169,16 @@ function resize(e) {
             newHeight = startHeight + deltaY;
             newLeft = startLeft + deltaX;
             newTop = startTop;
-            if (newWidth < 0) {
-                newWidth = Math.abs(newWidth);
-                newLeft = startLeft + startWidth;
-            }
-            if (newHeight < 0) {
-                newHeight = Math.abs(newHeight);
-                newHeight = Math.min(newHeight, startTop);
-                newTop = startTop - newHeight;
+            applyShiftAdjust();
+            if (enableOpposite) {
+                if (newWidth < 0) {
+                    newWidth = Math.abs(newWidth);
+                    newLeft = startLeft + startWidth;
+                }
+                if (newHeight < 0) {
+                    newHeight = Math.abs(newHeight);
+                    newTop = startTop - newHeight;
+                }
             }
         }
     // 右上角
@@ -121,13 +190,16 @@ function resize(e) {
             newHeight = startHeight - deltaY;
             newLeft = startLeft;
             newTop = startTop + deltaY;
-            if (newWidth < 0) {
-                newWidth = Math.abs(newWidth);
-                newLeft = startLeft - newWidth;
-            }
-            if (newHeight < 0) {
-                newHeight = Math.abs(newHeight);
-                newTop = startTop + startHeight;
+            applyShiftAdjust();
+            if (enableOpposite) {
+                if (newWidth < 0) {
+                    newWidth = Math.abs(newWidth);
+                    newLeft = startLeft - newWidth;
+                }
+                if (newHeight < 0) {
+                    newHeight = Math.abs(newHeight);
+                    newTop = startTop + startHeight;
+                }
             }
         }
     // 左上角
@@ -139,13 +211,16 @@ function resize(e) {
             newHeight = startHeight - deltaY;
             newLeft = startLeft + deltaX;
             newTop = startTop + deltaY;
-            if (newWidth < 0) {
-                newWidth = Math.abs(newWidth);
-                newLeft = startLeft + startWidth;
-            }
-            if (newHeight < 0) {
-                newHeight = Math.abs(newHeight);
-                newTop = startTop + startHeight;
+            applyShiftAdjust();
+            if (enableOpposite) {
+                if (newWidth < 0) {
+                    newWidth = Math.abs(newWidth);
+                    newLeft = startLeft + startWidth;
+                }
+                if (newHeight < 0) {
+                    newHeight = Math.abs(newHeight);
+                    newTop = startTop + startHeight;
+                }
             }
         }
     // 上
@@ -157,6 +232,9 @@ function resize(e) {
             newHeight = startHeight - deltaY;
             newLeft = startLeft;
             newTop = startTop + deltaY;
+            applyShiftAdjust();
+        }
+        if (enableOpposite) {
             if (newHeight < 0) {
                 newHeight = Math.abs(newHeight);
                 newTop = startTop + startHeight;
@@ -170,10 +248,13 @@ function resize(e) {
             newWidth = startWidth;
             newHeight = startHeight + deltaY;
             newLeft = startLeft;
-            newTop = startTop;
+            newTop = startTop; // 底部不改变 top 值
+            applyShiftAdjust();
+        }
+        if (enableOpposite) {
             if (newHeight < 0) {
                 newHeight = Math.abs(newHeight);
-                newHeight = Math.min(newHeight, startTop)
+                newHeight = Math.min(newHeight, startTop);
                 newTop = startTop - newHeight;
             }
         }
@@ -186,6 +267,9 @@ function resize(e) {
             newHeight = startHeight;
             newLeft = startLeft + deltaX;
             newTop = startTop;
+            applyShiftAdjust();
+        }
+        if (enableOpposite) {
             if (newWidth < 0) {
                 newWidth = Math.abs(newWidth);
                 newLeft = startLeft + startWidth;
@@ -198,77 +282,98 @@ function resize(e) {
         } else {
             newWidth = startWidth + deltaX;
             newHeight = startHeight;
-            newLeft = startLeft;
+            newLeft = startLeft; // 右侧不改变 left 值
             newTop = startTop;
+            applyShiftAdjust();
+        }
+        if (enableOpposite) {
             if (newWidth < 0) {
                 newWidth = Math.abs(newWidth);
-                newLeft = startLeft  - newWidth;
+                newLeft = startLeft - newWidth;
             }
         }
     }
 
-    if (isShiftPressed) {
-        let adjustedWidth, adjustedHeight;
-        if (currentHandle.classList.contains('top') || currentHandle.classList.contains('bottom')) {
-            adjustedHeight = newHeight;
-            adjustedWidth = newHeight * aspectRatio;
-        } else if (currentHandle.classList.contains('left') || currentHandle.classList.contains('right')) {
-            adjustedWidth = newWidth;
-            adjustedHeight = newWidth / aspectRatio;
-        } else {
+    function keepRatio() {
+        // 保持比例，输出不变形
+        if (isShiftPressed && !isAltPressed) {
             if (newWidth / aspectRatio <= newHeight) {
-                adjustedWidth = newWidth;
-                adjustedHeight = newWidth / aspectRatio;
-                // console.log('d1')
+                newHeight = newWidth / aspectRatio;
             } else {
-                adjustedHeight = newHeight;
-                adjustedWidth = newHeight * aspectRatio;
-                // console.log('d2', adjustedHeight, newHeight * aspectRatio, aspectRatio)
+                newWidth = newHeight * aspectRatio;
             }
-        }
-        // console.log('d3', adjustedHeight)
-        // 最大约束
-        // adjustedWidth = Math.min(adjustedWidth, newHeight * aspectRatio);
-
-        if (!isAltPressed) {
-            if (currentHandle.classList.contains('left-top') || currentHandle.classList.contains('left-bottom') || currentHandle.classList.contains('left')) {
-                newLeft = startLeft + startWidth - adjustedWidth;
-            }
-            if (currentHandle.classList.contains('left-top') || currentHandle.classList.contains('right-top') || currentHandle.classList.contains('top')) {
-                newTop = startTop + startHeight - adjustedHeight;
-            }
-        }
-        newWidth = adjustedWidth;
-        newHeight = adjustedHeight;
-    }
-
-    // 确保裁剪框不会超出容器边界
-    // newLeft = Math.max(0, Math.min(newLeft, containerRect.width - newWidth));
-    // newTop = Math.max(0, Math.min(newTop, containerRect.height - newHeight));
-    newWidth = Math.min(newWidth, containerRect.width - newLeft);
-    newHeight = Math.min(newHeight, containerRect.height - newTop);
-
-    // 保持比例，输出不变形
-    if (isShiftPressed) {
-        if (newWidth / aspectRatio <= newHeight) {
-            // adjustedWidth = newWidth;
-            newHeight = newWidth / aspectRatio;
-            console.log('d1')
-        } else {
-            // adjustedHeight = newHeight;
-            newWidth = newHeight * aspectRatio;
-            // console.log('d2', adjustedHeight, newHeight * aspectRatio, aspectRatio)
         }
     }
 
-    console.log('debug', { newWidth, newHeight, newLeft, newTop })
-    updateCropBox({ newWidth, newHeight, newLeft, newTop });
+    function limitByImgContainer() {
+        // 确保裁剪框不会超出容器边界
+        // newLeft = Math.max(0, Math.min(newLeft, containerRect.x + containerRect.width - newWidth));
+        // newTop = Math.max(0, Math.min(newTop, containerRect.y + containerRect.height - newHeight));
+        newWidth = Math.min(newWidth, containerRect.x + containerRect.width - newLeft); // 一侧不溢出
+        newWidth = Math.min(newWidth, containerRect.width); // 限制在容器内
+        newHeight = Math.min(newHeight, containerRect.y + containerRect.height - newTop);
+
+        // 公共限制，防止 x 超出左边界
+        if (newLeft < containerRect.x) {
+            const diff = containerRect.x - newLeft;
+            newLeft = containerRect.x;
+            newWidth -= diff;
+            if (isShiftPressed) {
+                newHeight = newWidth / aspectRatio;
+            }
+        }
+
+        if (newTop < containerRect.y) {
+            const diff = containerRect.y - newTop;
+            newTop = containerRect.y;
+            newHeight -= diff;
+            if (isShiftPressed) {
+                newWidth = newHeight * aspectRatio;
+            }
+        }
+    }
+
+    function minLimit() {
+        return newWidth <= 50 || newHeight <= 50;
+    }
+    function limitByEdge() {
+        const tolerance = 1; // 1像素的容差，以处理可能的舍入误差
+
+        const isLeftEdge = newLeft <= containerRect.x + tolerance;
+        const isRightEdge = newLeft + newWidth >= containerRect.x + containerRect.width - tolerance;
+        const isTopEdge = newTop <= containerRect.y + tolerance;
+        const isBottomEdge = newTop + newHeight >= containerRect.y + containerRect.height - tolerance;
+
+        console.log('isEdge', isRightEdge, { newLeft, newWidth }, containerRect);
+        return isLeftEdge || isRightEdge || isTopEdge || isBottomEdge;
+    }
+
+    // 按住 alt 或 shift时，有任意一边贴边时，停止 resize
+    if (isShiftPressed || isAltPressed) {
+        if (limitByEdge()) {
+            return;
+        }
+        // if (minLimit()) {
+        //     return;
+        // }
+    } else {
+    }
+
+    keepRatio();
+    limitByImgContainer();
+
+    // console.log('debug', { newWidth, newHeight, newLeft, newTop })
+    let scene = 'drag'
+    updateCropBox('resize', { newWidth, newHeight, newLeft, newTop });
 }
 
-function updateCropBox({newWidth, newHeight, newLeft, newTop}) {
+function updateCropBox(scene, {newWidth, newHeight, newLeft, newTop}) {
+    console.log('updateCropBox: ', scene, { newWidth, newHeight, newLeft, newTop })
     // 应用新的尺寸和位置
-    cropBox.style.width = `${newWidth}px`;
-    cropBox.style.height = `${newHeight}px`;
+    if (scene === 'resize') {
+        cropBox.style.width = `${newWidth}px`;
+        cropBox.style.height = `${newHeight}px`;       
+    }
     cropBox.style.left = `${newLeft}px`;
     cropBox.style.top = `${newTop}px`;    
 }
@@ -283,8 +388,7 @@ function drag(e) {
     let newLeft = Math.max(0, Math.min(startLeft + deltaX, containerRect.width - parseInt(cropBox.style.width)));
     let newTop = Math.max(0, Math.min(startTop + deltaY, containerRect.height - parseInt(cropBox.style.height)));
 
-    cropBox.style.left = `${newLeft}px`;
-    cropBox.style.top = `${newTop}px`;
+    updateCropBox('drag', {newLeft, newTop})
 }
 
 function stopInteraction() {
